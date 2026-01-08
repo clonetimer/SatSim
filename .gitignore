@@ -28,6 +28,7 @@ codegen/
 
 # Cache files
 *.slxc
+*.autosave
 
 # Cloud based storage dotfile
 .MATLABDriveTag
