@@ -106,5 +106,12 @@ A_w = [
 ]*sqrt(1/6);      % 安装矩阵，列为各轮轴向
 K_w = -A_w' * inv(A_w * A_w');
 
+%% 通信子系统
+f = 2.2e9;          % 载波频率
+c = physconst('LightSpeed');    % 光速，m/s
+Pt_dBW = 10;        % 发射功率，W
+Gt_dB = 3;          % 星上天线
+Gr_dB = 20;         % 地面站天线
+Noise_dBW = -170;   % N=kTB,k=1.38e-23J/K,T=290K,B=1MHz
 %% 打印信息
 disp("["+char(datetime('now'))+"]：初始化完成。");
