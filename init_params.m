@@ -31,10 +31,21 @@ hat_s = [1,0,0];    % 惯性系
 % 外部环境
 sunlit = 1;         % 日照标志,0/1
 P_panel = 300;      % 发电功率，W
+% 通信功耗
+P_comm = 40;        % 通信功耗，W
+sta_lat = 0;        % 地面站纬度
+sta_lon = 0;        % 地面站经度
+sta_vec = Re * [
+    cos(sta_lat)*cos(sta_lon);
+    cos(sta_lat)*sin(sta_lon);
+    sin(sta_lat)
+];                  % 地面站位置向量
+gamma_max = 60*pi/180;% 最大可见角，rad/s
+cos_g_max = cos(gamma_max);
 % 负载功耗
 P_base = 50;        % 基础功耗，W
 P_adcs = 20;        % 姿态确认与控制功耗，W
-P_comm = 40;        % 通信功耗，W
+
 E_max = 7.2e5;      % J，约200Wh
 SOC0 = 0.6;         % 80%初始电量
 E0 = E_max * SOC0;  % J，
