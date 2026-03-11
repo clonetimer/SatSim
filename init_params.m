@@ -117,6 +117,10 @@ Q0 = [0.6;0.8;0;0]; % 初始四元数
 quat = quaternion(Q0');
 eAR = euler(quat, 'ZYX', 'frame');% eulerAngles,Rad
 angle0 = eAR';   % 初始角度
+
+angleE = [-1.4326    0.3894   -0.3400];
+QE = eul2quat(angleE, 'ZYX');
+
 % ******************姿态控制器属性******************
 Kp = [
     0.05;
