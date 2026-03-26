@@ -36,6 +36,28 @@ elems(3).Max = [];
 elems(3).DocUnits = '';
 elems(3).Description = '';
 
+elems(4) = Simulink.BusElement;
+elems(4).Name = 'wheel';
+elems(4).Dimensions = 1;
+elems(4).DimensionsMode = 'Fixed';
+elems(4).DataType = 'Bus: wheel';
+elems(4).Complexity = 'real';
+elems(4).Min = [];
+elems(4).Max = [];
+elems(4).DocUnits = '';
+elems(4).Description = '';
+
+elems(5) = Simulink.BusElement;
+elems(5).Name = 'tau_dump';
+elems(5).Dimensions = 3;
+elems(5).DimensionsMode = 'Fixed';
+elems(5).DataType = 'double';
+elems(5).Complexity = 'real';
+elems(5).Min = [];
+elems(5).Max = [];
+elems(5).DocUnits = '';
+elems(5).Description = '';
+
 adcs = Simulink.Bus;
 adcs.HeaderFile = '';
 adcs.Description = '';
@@ -294,6 +316,39 @@ elems(2).Max = [];
 elems(2).DocUnits = '';
 elems(2).Description = '';
 
+elems(3) = Simulink.BusElement;
+elems(3).Name = 'thrust_on';
+elems(3).Dimensions = 1;
+elems(3).DimensionsMode = 'Fixed';
+elems(3).DataType = 'boolean';
+elems(3).Complexity = 'real';
+elems(3).Min = [];
+elems(3).Max = [];
+elems(3).DocUnits = '';
+elems(3).Description = '';
+
+elems(4) = Simulink.BusElement;
+elems(4).Name = 'sun_flag';
+elems(4).Dimensions = 1;
+elems(4).DimensionsMode = 'Fixed';
+elems(4).DataType = 'boolean';
+elems(4).Complexity = 'real';
+elems(4).Min = [];
+elems(4).Max = [];
+elems(4).DocUnits = '';
+elems(4).Description = '';
+
+elems(5) = Simulink.BusElement;
+elems(5).Name = 'hat_r_ss';
+elems(5).Dimensions = 3;
+elems(5).DimensionsMode = 'Fixed';
+elems(5).DataType = 'double';
+elems(5).Complexity = 'real';
+elems(5).Min = [];
+elems(5).Max = [];
+elems(5).DocUnits = '';
+elems(5).Description = '';
+
 orbit = Simulink.Bus;
 orbit.HeaderFile = '';
 orbit.Description = '';
@@ -339,6 +394,17 @@ elems(3).Max = [];
 elems(3).DocUnits = '';
 elems(3).Description = '';
 
+elems(4) = Simulink.BusElement;
+elems(4).Name = 'prop_on';
+elems(4).Dimensions = 1;
+elems(4).DimensionsMode = 'Fixed';
+elems(4).DataType = 'boolean';
+elems(4).Complexity = 'real';
+elems(4).Min = [];
+elems(4).Max = [];
+elems(4).DocUnits = '';
+elems(4).Description = '';
+
 power = Simulink.Bus;
 power.HeaderFile = '';
 power.Description = '';
@@ -352,8 +418,8 @@ assignin('base','power', power);
 % Bus object: propulsion 
 clear elems;
 elems(1) = Simulink.BusElement;
-elems(1).Name = 'p_prop';
-elems(1).Dimensions = 1;
+elems(1).Name = 'tau_et';
+elems(1).Dimensions = 3;
 elems(1).DimensionsMode = 'Fixed';
 elems(1).DataType = 'double';
 elems(1).Complexity = 'real';
@@ -363,7 +429,7 @@ elems(1).DocUnits = '';
 elems(1).Description = '';
 
 elems(2) = Simulink.BusElement;
-elems(2).Name = 'ax_thr';
+elems(2).Name = 'p_prop';
 elems(2).Dimensions = 1;
 elems(2).DimensionsMode = 'Fixed';
 elems(2).DataType = 'double';
@@ -374,7 +440,7 @@ elems(2).DocUnits = '';
 elems(2).Description = '';
 
 elems(3) = Simulink.BusElement;
-elems(3).Name = 'ay_thr';
+elems(3).Name = 'ax_thr';
 elems(3).Dimensions = 1;
 elems(3).DimensionsMode = 'Fixed';
 elems(3).DataType = 'double';
@@ -383,6 +449,28 @@ elems(3).Min = [];
 elems(3).Max = [];
 elems(3).DocUnits = '';
 elems(3).Description = '';
+
+elems(4) = Simulink.BusElement;
+elems(4).Name = 'ay_thr';
+elems(4).Dimensions = 1;
+elems(4).DimensionsMode = 'Fixed';
+elems(4).DataType = 'double';
+elems(4).Complexity = 'real';
+elems(4).Min = [];
+elems(4).Max = [];
+elems(4).DocUnits = '';
+elems(4).Description = '';
+
+elems(5) = Simulink.BusElement;
+elems(5).Name = 'az_thr';
+elems(5).Dimensions = 1;
+elems(5).DimensionsMode = 'Fixed';
+elems(5).DataType = 'double';
+elems(5).Complexity = 'real';
+elems(5).Min = [];
+elems(5).Max = [];
+elems(5).DocUnits = '';
+elems(5).Description = '';
 
 propulsion = Simulink.Bus;
 propulsion.HeaderFile = '';
@@ -511,12 +599,23 @@ elems(6) = Simulink.BusElement;
 elems(6).Name = 'propulsion';
 elems(6).Dimensions = 1;
 elems(6).DimensionsMode = 'Fixed';
-elems(6).DataType = 'Bus: thrust';
+elems(6).DataType = 'Bus: propulsion';
 elems(6).Complexity = 'real';
 elems(6).Min = [];
 elems(6).Max = [];
 elems(6).DocUnits = '';
 elems(6).Description = '';
+
+elems(7) = Simulink.BusElement;
+elems(7).Name = 'ttc';
+elems(7).Dimensions = 1;
+elems(7).DimensionsMode = 'Fixed';
+elems(7).DataType = 'Bus: ttc';
+elems(7).Complexity = 'real';
+elems(7).Min = [];
+elems(7).Max = [];
+elems(7).DocUnits = '';
+elems(7).Description = '';
 
 sat = Simulink.Bus;
 sat.HeaderFile = '';
@@ -605,4 +704,205 @@ states.PreserveElementDimensions = 0;
 states.Elements = elems;
 clear elems;
 assignin('base','states', states);
+
+% Bus object: ttc 
+clear elems;
+elems(1) = Simulink.BusElement;
+elems(1).Name = 'cmd_comm_on';
+elems(1).Dimensions = 1;
+elems(1).DimensionsMode = 'Fixed';
+elems(1).DataType = 'boolean';
+elems(1).Complexity = 'real';
+elems(1).Min = [];
+elems(1).Max = [];
+elems(1).DocUnits = '';
+elems(1).Description = '';
+
+elems(2) = Simulink.BusElement;
+elems(2).Name = 'downlink_on';
+elems(2).Dimensions = 1;
+elems(2).DimensionsMode = 'Fixed';
+elems(2).DataType = 'boolean';
+elems(2).Complexity = 'real';
+elems(2).Min = [];
+elems(2).Max = [];
+elems(2).DocUnits = '';
+elems(2).Description = '';
+
+elems(3) = Simulink.BusElement;
+elems(3).Name = 'range_m';
+elems(3).Dimensions = 1;
+elems(3).DimensionsMode = 'Fixed';
+elems(3).DataType = 'double';
+elems(3).Complexity = 'real';
+elems(3).Min = [];
+elems(3).Max = [];
+elems(3).DocUnits = '';
+elems(3).Description = '';
+
+elems(4) = Simulink.BusElement;
+elems(4).Name = 'range_rate';
+elems(4).Dimensions = 1;
+elems(4).DimensionsMode = 'Fixed';
+elems(4).DataType = 'double';
+elems(4).Complexity = 'real';
+elems(4).Min = [];
+elems(4).Max = [];
+elems(4).DocUnits = '';
+elems(4).Description = '';
+
+elems(5) = Simulink.BusElement;
+elems(5).Name = 'az_rad';
+elems(5).Dimensions = 1;
+elems(5).DimensionsMode = 'Fixed';
+elems(5).DataType = 'double';
+elems(5).Complexity = 'real';
+elems(5).Min = [];
+elems(5).Max = [];
+elems(5).DocUnits = '';
+elems(5).Description = '';
+
+elems(6) = Simulink.BusElement;
+elems(6).Name = 'el_rad';
+elems(6).Dimensions = 1;
+elems(6).DimensionsMode = 'Fixed';
+elems(6).DataType = 'double';
+elems(6).Complexity = 'real';
+elems(6).Min = [];
+elems(6).Max = [];
+elems(6).DocUnits = '';
+elems(6).Description = '';
+
+elems(7) = Simulink.BusElement;
+elems(7).Name = 'vizit';
+elems(7).Dimensions = 1;
+elems(7).DimensionsMode = 'Fixed';
+elems(7).DataType = 'boolean';
+elems(7).Complexity = 'real';
+elems(7).Min = [];
+elems(7).Max = [];
+elems(7).DocUnits = '';
+elems(7).Description = '';
+
+ttc = Simulink.Bus;
+ttc.HeaderFile = '';
+ttc.Description = '';
+ttc.DataScope = 'Auto';
+ttc.Alignment = -1;
+ttc.PreserveElementDimensions = 0;
+ttc.Elements = elems;
+clear elems;
+assignin('base','ttc', ttc);
+
+% Bus object: wheel 
+clear elems;
+elems(1) = Simulink.BusElement;
+elems(1).Name = 'wheel1';
+elems(1).Dimensions = 1;
+elems(1).DimensionsMode = 'Fixed';
+elems(1).DataType = 'Bus: wheel1';
+elems(1).Complexity = 'real';
+elems(1).Min = [];
+elems(1).Max = [];
+elems(1).DocUnits = '';
+elems(1).Description = '';
+
+elems(2) = Simulink.BusElement;
+elems(2).Name = 'wheel2';
+elems(2).Dimensions = 1;
+elems(2).DimensionsMode = 'Fixed';
+elems(2).DataType = 'Bus: wheel1';
+elems(2).Complexity = 'real';
+elems(2).Min = [];
+elems(2).Max = [];
+elems(2).DocUnits = '';
+elems(2).Description = '';
+
+elems(3) = Simulink.BusElement;
+elems(3).Name = 'wheel3';
+elems(3).Dimensions = 1;
+elems(3).DimensionsMode = 'Fixed';
+elems(3).DataType = 'Bus: wheel1';
+elems(3).Complexity = 'real';
+elems(3).Min = [];
+elems(3).Max = [];
+elems(3).DocUnits = '';
+elems(3).Description = '';
+
+elems(4) = Simulink.BusElement;
+elems(4).Name = 'wheel4';
+elems(4).Dimensions = 1;
+elems(4).DimensionsMode = 'Fixed';
+elems(4).DataType = 'Bus: wheel1';
+elems(4).Complexity = 'real';
+elems(4).Min = [];
+elems(4).Max = [];
+elems(4).DocUnits = '';
+elems(4).Description = '';
+
+wheel = Simulink.Bus;
+wheel.HeaderFile = '';
+wheel.Description = '';
+wheel.DataScope = 'Auto';
+wheel.Alignment = -1;
+wheel.PreserveElementDimensions = 0;
+wheel.Elements = elems;
+clear elems;
+assignin('base','wheel', wheel);
+
+% Bus object: wheel1 
+clear elems;
+elems(1) = Simulink.BusElement;
+elems(1).Name = 'i';
+elems(1).Dimensions = 1;
+elems(1).DimensionsMode = 'Fixed';
+elems(1).DataType = 'double';
+elems(1).Complexity = 'real';
+elems(1).Min = [];
+elems(1).Max = [];
+elems(1).DocUnits = '';
+elems(1).Description = sprintf('电枢电流');
+
+elems(2) = Simulink.BusElement;
+elems(2).Name = 'tau';
+elems(2).Dimensions = 1;
+elems(2).DimensionsMode = 'Fixed';
+elems(2).DataType = 'double';
+elems(2).Complexity = 'real';
+elems(2).Min = [];
+elems(2).Max = [];
+elems(2).DocUnits = '';
+elems(2).Description = sprintf('作用力矩');
+
+elems(3) = Simulink.BusElement;
+elems(3).Name = 'n';
+elems(3).Dimensions = 1;
+elems(3).DimensionsMode = 'Fixed';
+elems(3).DataType = 'double';
+elems(3).Complexity = 'real';
+elems(3).Min = [];
+elems(3).Max = [];
+elems(3).DocUnits = '';
+elems(3).Description = sprintf('转速,rad/s');
+
+elems(4) = Simulink.BusElement;
+elems(4).Name = 'h';
+elems(4).Dimensions = 1;
+elems(4).DimensionsMode = 'Fixed';
+elems(4).DataType = 'double';
+elems(4).Complexity = 'real';
+elems(4).Min = [];
+elems(4).Max = [];
+elems(4).DocUnits = '';
+elems(4).Description = sprintf('角动量');
+
+wheel1 = Simulink.Bus;
+wheel1.HeaderFile = '';
+wheel1.Description = '';
+wheel1.DataScope = 'Auto';
+wheel1.Alignment = -1;
+wheel1.PreserveElementDimensions = 0;
+wheel1.Elements = elems;
+clear elems;
+assignin('base','wheel1', wheel1);
 

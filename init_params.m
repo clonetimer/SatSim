@@ -38,9 +38,6 @@ utc0_jd = floor(365.25*(year + 4716)) + ...
           floor(30.6001*(month + 1)) + D + B - 1524.5;
 
 %% ----------------------电源子系统---------------------
-% ************外部环境***********
-sunlit = 1;         % 日照标志,0/1
-P_panel = 1000;      % 发电功率，W
 % ************通信可见性判断************
 sta_lat = 0;        % 地面站纬度，rad
 sta_lon = 0;        % 地面站经度，rad
@@ -67,7 +64,7 @@ I_f = 3.15e-7;      % 反向饱和电流，表示二极管的漏电流，A
 R_s = 0.0042;       % 串联电阻，影响电池在负载下的性能，ohm
 R_p = 10.1;         % 并联电阻，表示光伏电池的漏泄电流，ohm
 V_t = 0.025;        % 热电压，V，通常为$V_t=kT/q$，其中k是玻尔兹曼常数，T是温度，q是电子电荷
-n = 1.4;            % 二极管的理想因子
+n_diode = 1.4;            % 二极管的理想因子
 Vmp = 7/15;          % 单结硅末期、高温下的工作电压
 num_s = ceil((V_bus0+3)/Vmp);         % 光伏模块串联电池单元个数。
 num_p = 2;         % 光伏模块并联电池单元个数。
@@ -84,9 +81,6 @@ P_base = 20;        % 基础功耗，W
 P_adcs = 20;        % 姿态确认与控制固定功耗，W
 P_prop = 5;         % 推进系统功耗（化学），W
 P_comm = 30;        % 通信功耗，W
-E_max = 7.2e5;      % J，约200Wh
-SOC0 = 0.6;         % 80%初始电量
-E0 = E_max * SOC0;  % J，
 SOC_low_comm = 0.2; % 低于 20% 关通信功耗
 SOC_low_prop = 0.2; % 低于 20% 关推进功耗
 SOC_low_adcs = 0.1; % 低于 10% 关姿态功耗
@@ -103,7 +97,8 @@ I_chg_max = 8;      % 充电电流限幅，A
 I_dis_max = 10;     % 放电电流限幅，A
 eta_chg = 0.95;     % 充电效率
 eta_dis = 0.95;     % 放电效率
-Q = 20;             % 最大电量，Ah
+Qbat = 20;             % 最大电量，Ah
+SOC0 = 0.6;         % 初始荷电状态
 V_max = 33;         % 最大电压，V
 V_min = 24;         % 最小电压，V
 Rb = 0.2;           % 蓄电池内阻，ohm
@@ -120,7 +115,8 @@ eAR = euler(quat, 'ZYX', 'frame');% eulerAngles,Rad
 angle0 = eAR';   % 初始角度
 
 % angleE = [-1.4326    0.3894   -0.3400];
-angleE = [0,0,0];
+% angleE = [0,0,0];
+angleE = angle0';
 QE = eul2quat(angleE, 'ZYX');
 
 % ******************姿态控制器属性******************
@@ -134,6 +130,7 @@ Kd = [
     1.32;
     0.88
 ];                  % 姿态控制器-积分系数
+control_flag = 0;   % 控制指令切换标志位
 Torque_limit = 0.2; % N*m，控制力矩限幅
 % ******************反作用轮属性******************
 tau = 0.05;         % s，伺服时间常数
@@ -169,7 +166,7 @@ eta = 0.7;          % 机电效率
 rpm_max = 6000;     % 反作用轮最大转速，rpm
 h_max = Iw * rpm_max * sqrt(6);% 单轴角动量上限
 sf_factor = 0.85;   % 安全系数
-k_h = 0.05;         % 角动量卸载比例系数，1/s
+k_h = -0.05;         % 角动量卸载比例系数，1/s
 
 % alpha_w = atan(sqrt(2));% 金字塔构型角
 % beta1 = pi/4;       % 1#飞轮方位角
@@ -183,6 +180,9 @@ A_w = [
   2, 2, 2, 2;
 ]*sqrt(1/6);                % 安装矩阵，列为各轮轴向
 K_w = A_w' / (A_w * A_w');  % 分配矩阵，安装矩阵的伪逆
+p_sat = 1*pi/180;            % 角速度限幅，rad/s
+q_sat = 1*pi/180;            % 角速度限幅，rad/s
+r_sat = 1*pi/180;            % 角速度限幅，rad/s
 % ******************激光陀螺******************
 % 几何参数
 perimeter_m = 0.4;          % 谐振腔弦长，m
@@ -279,15 +279,17 @@ eta_twta = 0.35;        % 效率
 
 %% -------------------推进子系统--------------------------
 % 化推
-T_nominal = 20;     % 小推力，N
+T_nominal = 100;    % 固定推力，N
 Isp = 220;          % 化推比冲，s
 g0 = 9.80665;       % 重力加速度
 m0 = 20;            % 初始工质质量，kg
 tau_thr = 0.2;      % 推力时间常数
 r_ref = 7.026e6;    % 轨道半径维持
+D_thr = 0.4;        % 推力输出占空比
+T_thr = 1;          % 推力输出周期
 % 电推
 eta_et = 0.9;       % 电推推进效率，0~1
-P_et_max = 10;      % 电推功耗，W
+P_et_max = 25;      % 电推功耗，W
 m0_et = 5;          % 电推推进剂初始质量，kg
 tau_et = 0.5;       % 电推响应时间常数 
 Isp_et = 1500;      % 电推比冲，s
@@ -298,6 +300,260 @@ comm_allow = 1;     % 通信允许，0/1
 cmd_on_step = 500;  % 发射机开机指令时刻，s
 cmd_off_step = 2000;% 发射机关机指令时刻，s
 R_data = 1e6;       % 数据生成速率
+cmd_comm = 1;       % 通信指令
+%% -------------------故障注入部分-------------------------
+% 光纤陀螺
+%# 偏差
+gyro_bias_on = 0;           % 使能
+gyro_bias_time = 0;         % 注入时间
+gyro_bias_value = [0;0;0];  % 幅度
+%# 漂移
+gyro_drift_on = 0;           % 使能
+gyro_drift_time = 0;         % 注入时间
+gyro_drift_value = [0;0;0];  % 幅度
+gyro_drift_max = 0.1;        % 限幅
+%# 锁定
+gyro_lock_on = 0;           % 使能
+gyro_lock_time = 0;         % 注入时间
+%# 掉线
+gyro_drop_on = 0;           % 使能
+gyro_drop_time = 0;         % 注入时间
+gyro_drop_value = [0;0;0];  % 幅度
+%# 延迟
+gyro_delay_on = 0;           % 使能
+gyro_delay_time = 0;         % 注入时间
+gyro_delay_value = 0;        % 延迟步长，整数
+% 星敏
+%# 偏差
+star_bias_on = 0;           % 使能
+star_bias_time = 0;         % 注入时间
+star_bias_value = [0;0;0];  % 幅度
+%# 漂移
+star_drift_on = 0;           % 使能
+star_drift_time = 0;         % 注入时间
+star_drift_value = [0;0;0];  % 幅度
+star_drift_max = 0.1;        % 限幅
+%# 锁定
+star_lock_on = 0;           % 使能
+star_lock_time = 0;         % 注入时间
+%# 掉线
+star_drop_on = 0;           % 使能
+star_drop_time = 0;         % 注入时间
+star_drop_value = [0;0;0];  % 幅度
+%# 延迟
+star_delay_on = 0;           % 使能
+star_delay_time = 0;         % 注入时间
+star_delay_value = 0;        % 延迟步长，整数
+% 太敏
+%# 偏差
+dss_bias_on = 0;           % 使能
+dss_bias_time = 0;         % 注入时间
+dss_bias_value = [0;0;0];  % 幅度
+%# 漂移
+dss_drift_on = 0;           % 使能
+dss_drift_time = 0;         % 注入时间
+dss_drift_value = [0;0;0];  % 幅度
+dss_drift_max = 0.1;        % 限幅
+%# 锁定
+dss_lock_on = 0;           % 使能
+dss_lock_time = 0;         % 注入时间
+%# 掉线
+dss_drop_on = 0;           % 使能
+dss_drop_time = 0;         % 注入时间
+dss_drop_value = [1;0;0];  % 幅度
+%# 延迟
+dss_delay_on = 0;           % 使能
+dss_delay_time = 0;         % 注入时间
+dss_delay_value = 0;        % 延迟步长，整数
+%-----------------------------
+% 反作用轮组件
+%# 力矩退化
+rw1_deg_on = 0;           % 使能
+rw1_deg_time = 0;         % 注入时间
+rw1_deg_value = 1;        % 幅度
+%# 力矩饱和
+rw1_sat_on = 0;           % 使能
+rw1_sat_time = 0;         % 注入时间
+rw1_sat_value = 1;        % 幅度
+%# 力矩延迟
+rw1_delay_on = 0;           % 使能
+rw1_delay_time = 0;         % 注入时间
+rw1_delay_value = 0;        % 幅度
+%# 力矩掉线
+rw1_drop_on = 0;           % 使能
+rw1_drop_time = 0;         % 注入时间
+rw1_drop_value = 0;        % 幅度
+%# 力矩迟缓
+rw1_slow_on = 0;           % 使能
+rw1_slow_time = 0;         % 注入时间
+rw1_slow_value = 0;        % 幅度
+%# 力矩锁定
+rw1_lock_on = 0;           % 使能
+rw1_lock_time = 0;         % 注入时间
+%# 摩擦力矩乘性
+rw1_fric_on = 0;           % 使能
+rw1_fric_time = 0;         % 注入时间
+rw1_fric_value = 0;        % 幅度
+%# 摩擦力矩加性
+rw1_bias_on = 0;           % 使能
+rw1_bias_time = 0;         % 注入时间
+rw1_bias_value = 0;        % 幅度
+%------------------------
+%# 力矩退化
+rw2_deg_on = 0;           % 使能
+rw2_deg_time = 0;         % 注入时间
+rw2_deg_value = 1;        % 幅度
+%# 力矩饱和
+rw2_sat_on = 0;           % 使能
+rw2_sat_time = 0;         % 注入时间
+rw2_sat_value = 1;        % 幅度
+%# 力矩延迟
+rw2_delay_on = 0;           % 使能
+rw2_delay_time = 0;         % 注入时间
+rw2_delay_value = 0;        % 幅度
+%# 力矩掉线
+rw2_drop_on = 0;           % 使能
+rw2_drop_time = 0;         % 注入时间
+rw2_drop_value = 0;        % 幅度
+%# 力矩迟缓
+rw2_slow_on = 0;           % 使能
+rw2_slow_time = 0;         % 注入时间
+rw2_slow_value = 0;        % 幅度
+%# 力矩锁定
+rw2_lock_on = 0;           % 使能
+rw2_lock_time = 0;         % 注入时间
+%# 摩擦力矩乘性
+rw2_fric_on = 0;           % 使能
+rw2_fric_time = 0;         % 注入时间
+rw2_fric_value = 0;        % 幅度
+%# 摩擦力矩加性
+rw2_bias_on = 0;           % 使能
+rw2_bias_time = 0;         % 注入时间
+rw2_bias_value = 0;        % 幅度
+% 3----------------------------
+%# 力矩退化
+rw3_deg_on = 0;           % 使能
+rw3_deg_time = 0;         % 注入时间
+rw3_deg_value = 1;        % 幅度
+%# 力矩饱和
+rw3_sat_on = 0;           % 使能
+rw3_sat_time = 0;         % 注入时间
+rw3_sat_value = 1;        % 幅度
+%# 力矩延迟
+rw3_delay_on = 0;           % 使能
+rw3_delay_time = 0;         % 注入时间
+rw3_delay_value = 0;        % 幅度
+%# 力矩掉线
+rw3_drop_on = 0;           % 使能
+rw3_drop_time = 0;         % 注入时间
+rw3_drop_value = 0;        % 幅度
+%# 力矩迟缓
+rw3_slow_on = 0;           % 使能
+rw3_slow_time = 0;         % 注入时间
+rw3_slow_value = 0;        % 幅度
+%# 力矩锁定
+rw3_lock_on = 0;           % 使能
+rw3_lock_time = 0;         % 注入时间
+%# 摩擦力矩乘性
+rw3_fric_on = 0;           % 使能
+rw3_fric_time = 0;         % 注入时间
+rw3_fric_value = 0;        % 幅度
+%# 摩擦力矩加性
+rw3_bias_on = 0;           % 使能
+rw3_bias_time = 0;         % 注入时间
+rw3_bias_value = 0;        % 幅度
+% -----------------------------
+%# 力矩退化
+rw4_deg_on = 0;           % 使能
+rw4_deg_time = 0;         % 注入时间
+rw4_deg_value = 1;        % 幅度
+%# 力矩饱和
+rw4_sat_on = 0;           % 使能
+rw4_sat_time = 0;         % 注入时间
+rw4_sat_value = 1;        % 幅度
+%# 力矩延迟
+rw4_delay_on = 0;           % 使能
+rw4_delay_time = 0;         % 注入时间
+rw4_delay_value = 0;        % 幅度
+%# 力矩掉线
+rw4_drop_on = 0;           % 使能
+rw4_drop_time = 0;         % 注入时间
+rw4_drop_value = 0;        % 幅度
+%# 力矩迟缓
+rw4_slow_on = 0;           % 使能
+rw4_slow_time = 0;         % 注入时间
+rw4_slow_value = 0;        % 幅度
+%# 力矩锁定
+rw4_lock_on = 0;           % 使能
+rw4_lock_time = 0;         % 注入时间
+%# 摩擦力矩乘性
+rw4_fric_on = 0;           % 使能
+rw4_fric_time = 0;         % 注入时间
+rw4_fric_value = 0;        % 幅度
+%# 摩擦力矩加性
+rw4_bias_on = 0;           % 使能
+rw4_bias_time = 0;         % 注入时间
+rw4_bias_value = 0;        % 幅度
+% 化学推进故障
+%------------------------
+%# 推力退化
+cT_deg_on = 0;           % 使能
+cT_deg_time = 0;         % 注入时间
+cT_deg_value = 1;        % 幅度
+%# 推力延迟
+cT_delay_on = 0;           % 使能
+cT_delay_time = 0;         % 注入时间
+cT_delay_value = 0;        % 幅度
+%# 推力掉线
+cT_drop_on = 0;           % 使能
+cT_drop_time = 0;         % 注入时间
+cT_drop_value = 0;        % 幅度
+%# 推力锁定
+cT_lock_on = 0;           % 使能
+cT_lock_time = 0;         % 注入时间
+% 电推
+%# 推力退化
+eT_deg_on = 0;           % 使能
+eT_deg_time = 0;         % 注入时间
+eT_deg_value = 1;        % 幅度
+%# 推力延迟
+eT_delay_on = 0;           % 使能
+eT_delay_time = 0;         % 注入时间
+eT_delay_value = 0;        % 幅度
+%# 推力掉线
+eT_drop_on = 0;           % 使能
+eT_drop_time = 0;         % 注入时间
+eT_drop_value = [0;0;0];        % 幅度
+%# 推力锁定
+eT_lock_on = 0;           % 使能
+eT_lock_time = 0;         % 注入时间
+% 母线电压
+%# 压降
+Vbus_bias_on = 0;           % 使能
+Vbus_bias_time = 0;         % 注入时间
+Vbus_bias_value = 0;        % 幅度
+%# 掉线
+Vbus_drop_on = 0;           % 使能
+Vbus_drop_time = 0;         % 注入时间
+Vbus_drop_value = 0;        % 幅度
+% 蓄电池组
+%# 容量衰减乘性
+bat_cap_on = 0;           % 使能
+bat_cap_time = 0;         % 注入时间
+bat_cap_value = 1;        % 幅度
+%# 容量衰减加性
+bat_bias_on = 0;           % 使能
+bat_bias_time = 0;         % 注入时间
+bat_bias_value = 0;        % 幅度
+% 太阳翼故障
+%# 输出退化
+wing_deg_on = 0;           % 使能
+wing_deg_time = 0;         % 注入时间
+wing_deg_value = 1;        % 幅度
+%# 掉线
+wing_drop_on = 0;           % 使能
+wing_drop_time = 0;         % 注入时间
+wing_drop_value = 0;        % 幅度
 %% -------------------仿真参数----------------------------
-dt = 0.01;             % 仿真步长
+dt = 0.1;             % 仿真步长
 disp("["+char(datetime('now'))+"]：初始化完成。");
